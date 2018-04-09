@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MCAT© 2018</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+ <!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<!-- Popper JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script> 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style type="text/css">
+div.sec
+{
+display: none;
+}
+</style>
+</head>
+<body>
+<div class="container-fluid">
+<div>
+<h1>MCAT© 2018</h1>
+<h2>Welcome to the Exam, Future Social Justice Medical Warrior!</h2>
+<button class="sec btn btn-primary">Click to continue</button>
+</div>
+<div class="sec">
+<h2>Today's examination will be on the subject of Dog🐕 Whistles🎶.</h2>
+<button class="sec btn btn-primary">Click to continue</button>
+</div>
+<div class="sec">
+<h3>What is a Dog🐕 Whistle🎶?</h3>
+<blockquote class="blockquote">
+<p>A remark, speech, advertisement, etc. by a politician that is intended to be understood by a particular group, especially one with feelings of racism or hatred, without actually expressing these feelings. </p>
+<footer class="blockquote-footer">Cambridge Dictionary 📖</footer>
+</blockquote>
+<button class="sec btn btn-primary">Click to continue</button>
+</div>
+<div class="sec">
+<h3>Your task today will be to find dog whistles in video clips from the 2016 Presidential Election.</h3>
+<button class="sec btn btn-primary">Click to continue</button>
+</div>
+<div class="sec">
+<h3>Every time you hear a Dog🐕 Whistle🎶, push the <button class="btn btn-light">🐕🎶</button> button</h3>
+<button class="sec btn btn-primary">Click to continue</button>
+</div>
+<div class="sec">
+<ul>
+<li>Every time you correctly identify a statement as a Dog🐕 Whistle🎶, you will gain 15 points.</li>
+<li>Every time you incorrectly identify a statement as a Dog🐕 Whistle🎶, you will lose 5 points.</li>
+<li>When you are done identifying Dog🐕 Whistles🎶 for a video, push the <button class="btn btn-success">Done</button> button.</li>
+<li>After you push "Done", you will be asked to answer 1 or more multiple choice questions about the video.</li>
+</ul>
+<button class="sec btn btn-primary">Click to continue</button>
+</div>
+<div class="sec">
+<h3>Are you ready?</h3>
+<button class="btn btn-success sec">Begin</button>
+</div>
+<div id="quiz" class="sec">
+<!-- Audio Credit: http://audiosoundclips.com/whistle-sound-effects-sfx/ -->
+<audio id="whistle" src="whistle.m4a" hidden></audio>
+<div id="player"></div>
+<div>
+<div class="btn-group">
+<button class="btn btn-sm btn-primary" id="prevVid" disabled>
+<i class="fa fa-arrow-circle-left fa-lg"></i></button>
+<button class="btn btn-sm btn-success" id="nextVid">
+<i class="fa fa-arrow-circle-right fa-lg"></i>
+</button>
+</div>
+<button class="btn btn-outline-info" id="dogBtn">🐕🎶</button>
+</div>
+<div id="whistleAnswer" style="display:none">
+<textarea class="form-control" id="whistleReason" rows=5 maxLength=500></textarea>
+<button id="reasonSubmit" class="btn btn-sm btn-outline-secondary">Submit</button>
+</div>
+<ul class="list-group" id="whistles"></ul>
+</div>
+<canvas id="canvas" width=200 height=100></canvas>
+</div>
+<script src="videos.js"></script>
+<script>
+var player;
+var whistles = [];
+var vid = 0;
+var time;
+
+ var tag = document.createElement('script');
+      tag.src = "https://www.youtube.com/iframe_api";
+      var firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+$("button.sec").click(function() {$(this).parent().slideUp(function(){$(this).next().slideDown(
+function() {if(this.id=="quiz")player.cueVideoById(videos[0]);}
+)});});
+
+$("#prevVid").click(function() {vid--;switchVideo();});
+$("#nextVid").click(function() {vid++;switchVideo();});
+$("#whistleReason").keyup(function(){$("#reasonSubmit")[0].disabled = $(this).val().length==0;});
+$("#dogBtn").click(function() {
+if($("#whistleAnswer").is(":hidden")) {
+time = Math.floor(player.getCurrentTime()); 
+var seconds = time % 60;
+if(seconds < 10) seconds = "0"+seconds;
+var minutes = Math.floor(time/60);
+player.pauseVideo();
+$("#whistle")[0].play();
+$("#whistleReason").val("");
+$("#whistleReason")[0].placeholder = formatTime(time) + " Write the quote and why you think it is a Dog🐕 Whistle🎶";
+$("#whistleAnswer").data("edit",-1);
+}
+$("#reasonSubmit")[0].disabled = true;
+$("#whistleAnswer").slideToggle();
+});
+$("#reasonSubmit").click(function(){
+var editing = $("#whistleAnswer").data("edit");
+if(editing >= 0) {
+whistles[editing].reason = $("#whistleReason").val();
+$("#whistles").children().eq(editing).find(".response").text($("#whistleReason").val());
+}
+else
+{
+whistles.push({time:time,reason:$("#whistleReason").val(),video:videos[vid].id});
+var item = $("<li class='list-group-item list-group-item-action'>");
+var link = $("<a class='text-info' href='#'>");
+link.data("vid",vid);
+link.text("Video " + (vid+1));
+link.click(function(){vid = $(this).data("vid");switchVideo();player.playVideo()});
+item.append(link);
+item.append(" ");
+var link2 = $("<a class='text-warning' href='#'>");
+link2.data("vid",vid);
+link2.data("time",time);
+link2.text(formatTime(time));
+link2.click(function() {var v = $(this).data("vid");if(vid != v){vid = v;switchVideo();}
+player.seekTo($(this).data("time"));player.playVideo();});
+item.append(link2);
+item.append(" ");
+var response = $("<span class='response'>");
+response.text($("#whistleReason").val());
+item.append(response);
+var edit = $("<a href='#' class='fa fa-edit fa-lg text-muted px-1'>");
+edit.data("text",$("#whistleReason").val());
+edit.data("w",whistles.length-1);
+edit.click(function(){$("#whistleReason").val($(this).data("text"));
+$("#whistleReason")[0].placeholder="";$("#whistleAnswer").data("edit",$(this).data("w"));
+$("#reasonSubmit")[0].disabled = false;$("#whistleAnswer").slideDown();});
+item.append(edit);
+var del = $("<a href='#' class='fa fa-times-circle-o fa-lg text-danger'>");
+del.data("w",whistles.length-1);
+del.click(function() {if(confirm("Are you sure?")){$(this).parent().remove();whistles.splice($(this).data("w"),1);}});
+item.append(del);
+$("#whistles").append(item);
+}
+$("#whistleAnswer").slideUp();
+});
+
+function formatTime(t) {
+	var seconds = time % 60;
+	if(seconds < 10) seconds = "0"+seconds;
+	var minutes = Math.floor(time/60);
+	return "("+minutes+":"+seconds+")";
+}
+
+function switchVideo()
+{
+$("#whistleAnswer").slideUp();
+ $("#prevVid")[0].disabled = vid<=0;
+ $("#nextVid")[0].disabled = vid>=videos.length-1;
+player.cueVideoById(videos[vid]);
+}
+
+function onYouTubeIframeAPIReady() {
+      
+       player = new YT.Player('player', {
+          width: '480',
+          height: '270',
+          events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
+          },
+
+        playerVars:{'autoplay':0,'rel':0,'playsinline':1,'showinfo':0,'modestbranding':1}
+        });
+        
+      
+      }
+
+      // 4. The API will call this function when the video player is ready.
+      function onPlayerReady(event) {
+        $("#canvas")[0].getContext("2d").drawImage($("#player")[0],0,0);
+      }
+
+      // 5. The API calls this function when the player's state changes.
+      //    The function indicates that when playing a video (state=1),
+      //    the player should play for six seconds and then stop.
+      var done = false;
+      function onPlayerStateChange(event) {
+       	if(event.target.getPlayerState()==1) {
+       		$("#whistleAnswer").slideUp();
+       	}
+      }
+   
+</script>
+</body>
+</html>
