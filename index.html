@@ -15,6 +15,7 @@
 
 <!-- Latest compiled JavaScript -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script> 
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <style type="text/css">
 div.sec
@@ -47,7 +48,7 @@ display: none;
 <button class="sec btn btn-primary">Click to continue</button>
 </div>
 <div class="sec">
-<h3>Every time you hear a Dog🐕 Whistle🎶, push the <button class="btn btn-light">🐕🎶</button> button</h3>
+<h3>Every time you hear a Dog🐕 Whistle🎶, push the <button class="btn btn-outline-info">🐕🎶</button> button</h3>
 <button class="sec btn btn-primary">Click to continue</button>
 </div>
 <div class="sec">
@@ -55,7 +56,7 @@ display: none;
 <li>Every time you correctly identify a statement as a Dog🐕 Whistle🎶, you will gain 15 points.</li>
 <li>Every time you incorrectly identify a statement as a Dog🐕 Whistle🎶, you will lose 5 points.</li>
 <li>When you are done identifying Dog🐕 Whistles🎶 for a video, push the <button class="btn btn-success">Done</button> button.</li>
-<li>After you push "Done", you will be asked to answer 1 or more multiple choice questions about the video.</li>
+<li>After you push "Done", you will be asked to answer several multiple choice questions about the videos.</li>
 </ul>
 <button class="sec btn btn-primary">Click to continue</button>
 </div>
@@ -76,12 +77,36 @@ display: none;
 </button>
 </div>
 <button class="btn btn-outline-info" id="dogBtn">🐕🎶</button>
+<button class="btn btn-success" id="finishWhistles" style="display:none">Done</button>
 </div>
 <div id="whistleAnswer" style="display:none">
 <textarea class="form-control" id="whistleReason" rows=5 maxLength=500></textarea>
 <button id="reasonSubmit" class="btn btn-sm btn-outline-secondary">Submit</button>
 </div>
 <ul class="list-group" id="whistles"></ul>
+</div>
+<div id="mc" class="sec" ng-app="mc" ng-controller="mc-con">
+<div ng-show="intro">
+<h2>You found <span>{{whistles.length}}</span> dogwhistles -- <small>{{getMsg(whistles.length)}}</small></h2>
+<h3>Now you will answer multiple choice questions about the videos you watched.</h3>
+<button class="btn btn-success" ng-click="intro=false">Begin</button>
+</div>
+<div ng-hide="intro">
+<div ng-repeat="x in questions" ng-show="q==$index">
+<h3>{{x.title}}</h3>
+<div class="list-group">
+<button class="list-group-item list-group-item-action" ng-repeat="y in x.choices" 
+data-toggle="list" ng-click="select($index)">{{y}}</button>
+</div>
+<div ng-show="button==2">
+<span class="text-success" ng-show="correct">Right</span>
+<span class="text-danger" ng-hide="correct">Wrong</span>
+{{" - " + x.explanation}}
+</div>
+</div>
+<button class="btn btn-success" ng-disabled="button==0" ng-hide="button==2" ng-click="submit()">Submit</button>
+<button class="btn btn-primary" ng-show="button==2" ng-click="next()">Next Question</button>
+</div>
 </div>
 </div>
 <script src="videos.js"></script>
@@ -90,6 +115,33 @@ var player;
 var whistles = [];
 var vid = 0;
 var time;
+var defer;
+
+
+var app = angular.module("mc", []);
+app.controller('mc-con', function($scope,$http,$q) {
+defer = $q.defer();
+defer.promise.then(function(data) {
+	$scope.whistles = whistles;
+});
+$scope.intro = true;
+$scope.q = 0;
+$scope.button = 0;
+$scope.next = function() {$scope.button = 0; $scope.q++;};
+$scope.select = function(i) {if($scope.button==0) {$scope.selected = i;$scope.button = 1;}};
+$scope.submit = function() {$scope.button = 2;
+$scope.correct = $scope.selected == $scope.questions[$scope.q].answer;
+}
+$scope.getMsg = function(x) {
+	if(x >= 10) return "Excellent job, young SJW!"; 
+else if(x >= 5) return "Nice job."
+return "Wow, were you even paying attention?";
+};
+$http.get("questions.json").then(function(response) {
+$scope.questions = response.data;
+});
+});
+
 
  var tag = document.createElement('script');
       tag.src = "https://www.youtube.com/iframe_api";
@@ -99,9 +151,11 @@ var time;
 $("button.sec").click(function() {$(this).parent().slideUp(function(){$(this).next().slideDown(
 function() {if(this.id=="quiz")player.cueVideoById(videos[0]);}
 )});});
-
 $("#prevVid").click(function() {vid--;switchVideo();});
 $("#nextVid").click(function() {vid++;switchVideo();});
+$("#finishWhistles").click(function() {if(confirm("Are you sure you're ready to go the next section?")) {
+defer.resolve("");$("#quiz").slideUp(function() {$("#mc").slideDown();});
+}});
 $("#whistleReason").keyup(function(){$("#reasonSubmit")[0].disabled = $(this).val().length==0;});
 $("#dogBtn").click(function() {
 if($("#whistleAnswer").is(":hidden")) {
@@ -173,6 +227,9 @@ function switchVideo()
 $("#whistleAnswer").slideUp();
  $("#prevVid")[0].disabled = vid<=0;
  $("#nextVid")[0].disabled = vid>=videos.length-1;
+ if(vid >= videos.length-1) {
+ 	$("#finishWhistles").fadeIn();
+ }
 player.cueVideoById(videos[vid]);
 }
 
