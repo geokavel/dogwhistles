@@ -25,7 +25,9 @@ display: none;
 </style>
 </head>
 <body>
-<div class="container-fluid">
+<div class="container-fluid m-3">
+<div class="row">
+<div class="col-md-6">
 <div>
 <h1>MCAT© 2018</h1>
 <h2>Welcome to the Exam, Future Social Justice Medical Warrior!</h2>
@@ -99,17 +101,44 @@ display: none;
 data-toggle="list" ng-click="select($index)">{{y}}</button>
 </div>
 </div>
-<button class="btn btn-success py-2" ng-show="button==1" ng-click="submit()">Submit</button>
+<button class="btn btn-success my-1" ng-show="button==1" ng-click="submit()">Submit</button>
 </div>
 <div ng-show="q==questions.length">
-<h2 ng-if="questions.length-score <= 3">
+<h2 ng-show="questions.length-score <= 3 && !review" class="text-success">
 Congratulations, your score on the multiple choice section allowed you to pass the exam!
 </h2>
-<h2 ng-if="questions.length-score > 3">
+<h3 ng-show="questions.length-score > 3 && !review" class="text-muted">
 Sorry, your score on the multiple choice section prevented you from passing the exam.
-</h2>
-<button class="btn btn-info">Review your answers</button>
-<a class="btn btn-danger" role="button">Next Steps</a> 
+</h3>
+<button class="btn btn-info" ng-hide="review" ng-click="review=true">Review your answers</button>
+<div ng-repeat="x in questions" ng-show="review && q2==$index"><h3 class="text-muted">{{x.title}}</h3>
+<h5>You picked:
+<small ng-show="responses[$index]==x.answer" class="text-success">{{x.choices[responses[$index]]}}
+<i class="fa fa-check"></i></small>
+<small ng-hide="responses[$index]==x.answer" class="text-danger">{{x.choices[responses[$index]]}}
+<i class="fa fa-close"></i></small>
+<span ng-hide="responses[$index]==x.answer"> Answer: <small class="text-success">{{x.choices[x.answer]}}</small></span>
+</h5>
+<h5>Explanation: <small class="text-secondary">{{x.explanation}}</small></h5>
+</div>
+<button class="btn btn-light" ng-show="review && q2<responses.length" ng-click="q2 = q2 + 1">
+<i class="fa fa-arrow-circle-right text-secondary"></i>
+</button>
+<a class="btn btn-warning" ng-show="q2==responses.length && end==0" role="button"
+href="https://www.weeklystandard.com/the-politicization-of-the-mcat/article/2012198"
+target="_blank" ng-click="finish()">Next Steps</a>
+<div ng-show="end==1">
+<h1 class="display-3">Thank you for playing MCAT© 2018!</h1>
+<h4 class="h3">Check the following box to submit your responses to my database (Recommended).</h2>
+<span class="text-secondary">
+I agree to anonymously send my responses for data collection:
+</span>
+<input ng-model="check" type="checkbox"/>
+<div><button class="btn btn-success my-1" ng-click="submitData()">Submit</button></div>
+</div>
+<h2 ng-show="end==2">You have completed the test. You may now log out.</h2>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -124,16 +153,23 @@ var defer;
 
 
 var app = angular.module("mc", []);
-app.controller('mc-con', function($scope,$http,$q) {
+app.controller('mc-con', function($scope,$http,$q,$timeout) {
 defer = $q.defer();
 defer.promise.then(function(data) {
 	$scope.whistles = whistles;
 });
 $scope.intro = true;
 $scope.q = 0;
+$scope.q2 = 0;
+$scope.review = false;
+$scope.end = 0;
 $scope.score = 0;
 $scope.button = 0;
 $scope.responses = [];
+$scope.submitData = function() {if($scope.check) {
+console.log("whistles="+whistles+"&responses="+$scope.responses);
+}};
+$scope.finish = function() {$timeout(function() {$scope.end=1},3000);};
 $scope.select = function(i) {if($scope.button==0) {$scope.selected = i;$scope.button = 1;}};
 $scope.submit = function() {$scope.button = 0;
 if($scope.selected == $scope.questions[$scope.q].answer) $scope.score++;
@@ -237,9 +273,9 @@ player.cueVideoById(videos[vid]);
 }
 
 function onYouTubeIframeAPIReady() {
-      
        player = new YT.Player('player', {
-          width: '480',
+       //480
+          width: '100%',
           height: '270',
           events: {
             'onReady': onPlayerReady,

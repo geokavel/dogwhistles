@@ -1,12 +1,12 @@
 [
 {"title":"Why does Donald Trump dogwhistle?","choices":["It works","He's a bigot","He doesn't know he's doing it","He's a cynic"],
 "answer":1,"explanation":"Donald Trump's behaviour can only be understood as unabashed bigotry"},
-{"title":"Why do dogwhistles work on people?","choices":["People are bigoted","Dogwhistles work subliminally",
-"People love blaming others","They only work on the in group"],
-"answer":0,"explanation":"Studies throughout centuries have concluded that humanity is inherently bigoted"},
-{"title":"Why did some Hispanics vote for Donald Trump?","choices":["They are deferential to white power",
-"They dislike the undocumented ones","They ignored his immigration comments","National security"],
-"answer":0,"explanation":
+{"title":"Why do dogwhistles work on people?","choices":["Dogwhistles work subliminally",
+"People love blaming others","People are bigoted","They only work on the in group"],
+"answer":2,"explanation":"Studies throughout centuries have concluded that humanity is inherently bigoted"},
+{"title":"Why did some Hispanics vote for Donald Trump?","choices":["They dislike the undocumented ones",
+"They ignored his immigration comments","National security","They are deferential to white power"],
+"answer":3,"explanation":
 "Non-white immigrants to the United States rapidly become deferential to white power through a process known as \"acclimitization\""},
 {"title":"Why did some women vote for Donald Trump?","choices":["Submisiveness to males","National security",
 "Hormone imbalances","Female hysteria"],"answer":0,"explanation":"Women are inhrently submissive to males in a chauvinist country such as the United States"},
