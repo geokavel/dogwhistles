@@ -85,27 +85,32 @@ display: none;
 </div>
 <ul class="list-group" id="whistles"></ul>
 </div>
-<div id="mc" class="sec" ng-app="mc" ng-controller="mc-con">
-<div ng-show="intro">
-<h2>You found <span>{{whistles.length}}</span> dogwhistles -- <small>{{getMsg(whistles.length)}}</small></h2>
+<div id="mc" class="sec">
+<div>
 <h3>Now you will answer multiple choice questions about the videos you watched.</h3>
-<button class="btn btn-success" ng-click="intro=false">Begin</button>
+<button class="btn btn-success sec">Begin</button>
 </div>
-<div ng-hide="intro">
+<div class="sec" ng-app="mc" ng-controller="mc-con">
+<div ng-hide="q==questions.length">
 <div ng-repeat="x in questions" ng-show="q==$index">
 <h3>{{x.title}}</h3>
 <div class="list-group">
 <button class="list-group-item list-group-item-action" ng-repeat="y in x.choices" 
 data-toggle="list" ng-click="select($index)">{{y}}</button>
 </div>
-<div ng-show="button==2">
-<span class="text-success" ng-show="correct">Right</span>
-<span class="text-danger" ng-hide="correct">Wrong</span>
-{{" - " + x.explanation}}
 </div>
+<button class="btn btn-success py-2" ng-show="button==1" ng-click="submit()">Submit</button>
 </div>
-<button class="btn btn-success" ng-disabled="button==0" ng-hide="button==2" ng-click="submit()">Submit</button>
-<button class="btn btn-primary" ng-show="button==2" ng-click="next()">Next Question</button>
+<div ng-show="q==questions.length">
+<h2 ng-if="questions.length-score <= 3">
+Congratulations, your score on the multiple choice section allowed you to pass the exam!
+</h2>
+<h2 ng-if="questions.length-score > 3">
+Sorry, your score on the multiple choice section prevented you from passing the exam.
+</h2>
+<button class="btn btn-info">Review your answers</button>
+<a class="btn btn-danger" role="button">Next Steps</a> 
+</div>
 </div>
 </div>
 </div>
@@ -126,17 +131,15 @@ defer.promise.then(function(data) {
 });
 $scope.intro = true;
 $scope.q = 0;
+$scope.score = 0;
 $scope.button = 0;
-$scope.next = function() {$scope.button = 0; $scope.q++;};
+$scope.responses = [];
 $scope.select = function(i) {if($scope.button==0) {$scope.selected = i;$scope.button = 1;}};
-$scope.submit = function() {$scope.button = 2;
-$scope.correct = $scope.selected == $scope.questions[$scope.q].answer;
+$scope.submit = function() {$scope.button = 0;
+if($scope.selected == $scope.questions[$scope.q].answer) $scope.score++;
+$scope.responses.push($scope.selected);
+$scope.q++;
 }
-$scope.getMsg = function(x) {
-	if(x >= 10) return "Excellent job, young SJW!"; 
-else if(x >= 5) return "Nice job."
-return "Wow, were you even paying attention?";
-};
 $http.get("questions.json").then(function(response) {
 $scope.questions = response.data;
 });
@@ -147,7 +150,7 @@ $scope.questions = response.data;
       tag.src = "https://www.youtube.com/iframe_api";
       var firstScriptTag = document.getElementsByTagName('script')[0];
       firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
+      
 $("button.sec").click(function() {$(this).parent().slideUp(function(){$(this).next().slideDown(
 function() {if(this.id=="quiz")player.cueVideoById(videos[0]);}
 )});});
