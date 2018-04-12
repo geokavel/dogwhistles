@@ -167,8 +167,22 @@ $scope.score = 0;
 $scope.button = 0;
 $scope.responses = [];
 $scope.submitData = function() {if($scope.check) {
-console.log("whistles="+whistles+"&responses="+$scope.responses);
-}};
+var reasons = [];
+var times = [];
+var videos = [];
+	whistles.forEach(function(x,i) {reasons.push("reason"+i+"="+x["reason"]);
+	times.push(x["time"]);
+	videos.push(x["video"]);
+	});
+	reasons = reasons.join("&");
+	var req = encodeURI(reasons+"&times="+times+"&videos="+videos+"&mc="+$scope.responses);
+	$q(function(resolve,reject) {jQuery.post("record.php",req,function(data) {
+	resolve(data);})}).then(function(data){console.log("A"+data);});
+}
+else {
+end = 2;
+}
+};
 $scope.finish = function() {$timeout(function() {$scope.end=1},3000);};
 $scope.select = function(i) {if($scope.button==0) {$scope.selected = i;$scope.button = 1;}};
 $scope.submit = function() {$scope.button = 0;
