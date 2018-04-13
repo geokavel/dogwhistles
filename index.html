@@ -177,7 +177,7 @@ var videos = [];
 	reasons = reasons.join("&");
 	var req = encodeURI(reasons+"&times="+times+"&videos="+videos+"&mc="+$scope.responses);
 	console.log(req);
-	$q(function(resolve,reject) {jQuery.post("record.php",req,function(data) {
+	$q(function(resolve,reject) {jQuery.post("http://geokavel.byethost7.com/record.php",req,function(data) {
 	resolve(data);})}).then(function(data){console.log("A"+data);});
 }
 else {
