@@ -177,12 +177,9 @@ var videos = [];
 	reasons = reasons.join("&");
 	var req = encodeURI(reasons+"&times="+times+"&videos="+videos+"&mc="+$scope.responses);
 	console.log(req);
-	$q(function(resolve,reject) {jQuery.post("http://localhost/record.php",req,function(data) {
-	resolve(data);})}).then(function(data){console.log("A"+data);});
+	jQuery.post("http://geokavel.byethost7.com/record.php",req);
 }
-else {
 end = 2;
-}
 };
 $scope.finish = function() {$timeout(function() {$scope.end=1},3000);};
 $scope.select = function(i) {if($scope.button==0) {$scope.selected = i;$scope.button = 1;}};
