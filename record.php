@@ -4,7 +4,7 @@ $times = array();
 $videos = array();
 $mc = array();
 $reasons = array();
-foreach($_GET as $key=>$val) {
+foreach($_POST as $key=>$val) {
 $key = test_input($key);
 $val = test_input($val);
 if(strpos($key,"reason")===0) {
