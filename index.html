@@ -69,12 +69,13 @@ display: none;
 <div id="quiz" class="sec">
 <!-- Audio Credit: http://audiosoundclips.com/whistle-sound-effects-sfx/ -->
 <audio id="whistle" src="whistle.m4a" hidden></audio>
+<h3>Video <span id="vidNum">1</span>.</h3> 
 <div id="player"></div>
 <div>
 <div class="btn-group">
-<button class="btn btn-sm btn-primary" id="prevVid" disabled>
+<button class="btn btn-primary" id="prevVid" disabled>
 <i class="fa fa-arrow-circle-left fa-lg"></i></button>
-<button class="btn btn-sm btn-success" id="nextVid">
+<button class="btn btn-success" id="nextVid">
 <i class="fa fa-arrow-circle-right fa-lg"></i>
 </button>
 </div>
@@ -176,10 +177,9 @@ var videos = [];
 	});
 	reasons = reasons.join("&");
 	var req = encodeURI(reasons+"&times="+times+"&videos="+videos+"&mc="+$scope.responses);
-	console.log(req);
-	jQuery.post("http://geokavel.byethost7.com/record.php",req);
+	jQuery.post("record.php",req);
 }
-end = 2;
+$scope.end = 2;
 };
 $scope.finish = function() {$timeout(function() {$scope.end=1},3000);};
 $scope.select = function(i) {if($scope.button==0) {$scope.selected = i;$scope.button = 1;}};
@@ -257,9 +257,11 @@ edit.click(function(){$("#whistleReason").val($(this).data("text"));
 $("#whistleReason")[0].placeholder="";$("#whistleAnswer").data("edit",$(this).data("w"));
 $("#reasonSubmit")[0].disabled = false;$("#whistleAnswer").slideDown();});
 item.append(edit);
+//FIXME: del.data("w") is not correct after sibling deleted
 var del = $("<a href='#' class='fa fa-times-circle-o fa-lg text-danger'>");
 del.data("w",whistles.length-1);
-del.click(function() {if(confirm("Are you sure?")){$(this).parent().remove();whistles.splice($(this).data("w"),1);}});
+del.click(function() {if(confirm("Are you sure?")){$(this).parent().remove();
+whistles.splice($(this).data("w"),1);}});
 item.append(del);
 $("#whistles").append(item);
 }
@@ -275,6 +277,7 @@ function formatTime(t) {
 
 function switchVideo()
 {
+$("#vidNum").text(vid+1);
 $("#whistleAnswer").slideUp();
  $("#prevVid")[0].disabled = vid<=0;
  $("#nextVid")[0].disabled = vid>=videos.length-1;
