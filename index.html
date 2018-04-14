@@ -66,25 +66,50 @@ display: none;
 <h3>Are you ready?</h3>
 <button class="btn btn-success sec">Begin</button>
 </div>
-<div id="quiz" class="sec">
+<div id="quiz" ng-app="vidApp" ng-controller="vidCon" class="sec">
 <!-- Audio Credit: http://audiosoundclips.com/whistle-sound-effects-sfx/ -->
 <audio id="whistle" src="whistle.m4a" hidden></audio>
-<h3>Video <span id="vidNum">1</span>.</h3> 
+
+<h3 ng-hide="sample">Video <span id="vidNum">1</span>.</h3>
+<h3 ng-show="sample">Sample Video</h3>
+<span ng-show="sample">Look for dogwhistles in this sample video. Click the 
+<button class="btn btn-warning">Reveal</button> buttons to reveal the answers.
+</span>
 <div id="player"></div>
 <div>
-<div class="btn-group">
-<button class="btn btn-primary" id="prevVid" disabled>
+<div class="btn-group my-1" ng-hide="sample">
+<button class="btn btn-primary" ng-disabled="answering" id="prevVid" disabled>
 <i class="fa fa-arrow-circle-left fa-lg"></i></button>
-<button class="btn btn-success" id="nextVid">
+<button class="btn btn-success" ng-disabled="answering" id="nextVid">
 <i class="fa fa-arrow-circle-right fa-lg"></i>
 </button>
 </div>
-<button class="btn btn-outline-info" id="dogBtn">🐕🎶</button>
+<button class="btn btn-outline-info" ng-hide="sample" ng-click="answering=true" ng-disabled="answering" id="dogBtn">🐕🎶</button>
+<span ng-show="sample">
+<button ng-hide="reveal1" ng-click="reveal1 = true" class="btn btn-warning">Reveal #1</button>
+<div ng-show="reveal1"><a href="" class="text-warning" ng-click="seek(9)">(0:09)</a>
+Trump says that Mexico sends people with "lot of problems". This intentionally vague language 
+allows listeners to fill in the blanks with racist meaning.</div>
+<button ng-hide="reveal2" ng-click="reveal2 = true"  class="btn btn-warning">Reveal #2</button>
+<div ng-show="reveal2"><a href="" class="text-warning" ng-click="seek(17)">(0:17)</a>
+This is the dictionary definition (as presented earlier) of dog whistling. The statement, 
+"They're bringing drugs, they're bringing crime, they're rapists..." appears at first blush to 
+only apply to illegal immigrants. However, Trump is generalizing the fact that illegal immigrants committed a
+crime by crossing the border to suggest that illegal immigrants are in fact serial criminals. By doing 
+so he allows his listeners to conjure up racist images of Latino thugs in their heads. By the time
+he tries to moderate his rhetoric with, "...and some, I assume, are good people", the damage has
+already been done.
+</div>
+<button ng-show="reveal1 && reveal2" class="btn btn-success" ng-click="startTest()">
+Start the Test
+</button>
+</span>
 <button class="btn btn-success" id="finishWhistles" style="display:none">Done</button>
 </div>
 <div id="whistleAnswer" style="display:none">
 <textarea class="form-control" id="whistleReason" rows=5 maxLength=500></textarea>
-<button id="reasonSubmit" class="btn btn-sm btn-outline-secondary">Submit</button>
+<button id="reasonSubmit" ng-click="answering=false" class="btn btn btn-outline-secondary">Submit</button>
+<button id="reasonCancel" ng-click="answering=false" class="btn btn btn-outline-danger">Cancel</button>
 </div>
 <ul class="list-group" id="whistles"></ul>
 </div>
@@ -146,6 +171,9 @@ I agree to anonymously send my responses for data collection:
 </div>
 <script src="videos.js"></script>
 <script>
+
+//TODO: Only show whistles for currently showing video
+
 var player;
 var whistles = [];
 var vid = 0;
@@ -153,8 +181,22 @@ var time;
 var defer;
 
 
-var app = angular.module("mc", []);
-app.controller('mc-con', function($scope,$http,$q,$timeout) {
+var vidApp = angular.module("vidApp",[]);
+vidApp.controller("vidCon", function($scope) {
+	$scope.sample = true;
+	$scope.text = 0;
+	$scope.reveal1 = false;
+	$scope.reveal2 = false;
+	$scope.reveal3 = false;
+	$scope.seek = function(t) {player.seekTo(t);player.playVideo();}
+	$scope.startTest = function(){vid = 1; switchVideo();$scope.sample=false;};
+	$scope.answering = false;
+});
+
+
+
+var mcApp = angular.module("mc", []);
+mcApp.controller('mc-con', function($scope,$http,$q,$timeout) {
 defer = $q.defer();
 defer.promise.then(function(data) {
 	$scope.whistles = whistles;
@@ -171,9 +213,9 @@ $scope.submitData = function() {if($scope.check) {
 var reasons = [];
 var times = [];
 var videos = [];
-	whistles.forEach(function(x,i) {reasons.push("reason"+i+"="+x["reason"]);
-	times.push(x["time"]);
-	videos.push(x["video"]);
+	whistles.forEach(function(x,i) {reasons.push("reason"+i+"="+x.reason);
+	times.push(x.time);
+	videos.push(x.video);
 	});
 	reasons = reasons.join("&");
 	var req = encodeURI(reasons+"&times="+times+"&videos="+videos+"&mc="+$scope.responses);
@@ -198,18 +240,16 @@ $scope.questions = response.data;
       tag.src = "https://www.youtube.com/iframe_api";
       var firstScriptTag = document.getElementsByTagName('script')[0];
       firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-      
-$("button.sec").click(function() {$(this).parent().slideUp(function(){$(this).next().slideDown(
-function() {if(this.id=="quiz")player.cueVideoById(videos[0]);}
-)});});
+      //TODO: Change logic for when to slide up textarea
+$("button.sec").click(function() {$(this).parent().slideUp(function(){$(this).next().slideDown()});});
 $("#prevVid").click(function() {vid--;switchVideo();});
 $("#nextVid").click(function() {vid++;switchVideo();});
 $("#finishWhistles").click(function() {if(confirm("Are you sure you're ready to go the next section?")) {
 defer.resolve("");$("#quiz").slideUp(function() {$("#mc").slideDown();});
 }});
+$("#reasonCancel").click(function(){$("#whistleAnswer").slideUp();});
 $("#whistleReason").keyup(function(){$("#reasonSubmit")[0].disabled = $(this).val().length==0;});
 $("#dogBtn").click(function() {
-if($("#whistleAnswer").is(":hidden")) {
 time = Math.floor(player.getCurrentTime()); 
 var seconds = time % 60;
 if(seconds < 10) seconds = "0"+seconds;
@@ -219,9 +259,8 @@ $("#whistle")[0].play();
 $("#whistleReason").val("");
 $("#whistleReason")[0].placeholder = formatTime(time) + " Write the quote and why you think it is a Dog🐕 Whistle🎶";
 $("#whistleAnswer").data("edit",-1);
-}
 $("#reasonSubmit")[0].disabled = true;
-$("#whistleAnswer").slideToggle();
+$("#whistleAnswer").slideDown();
 });
 $("#reasonSubmit").click(function(){
 var editing = $("#whistleAnswer").data("edit");
@@ -233,6 +272,7 @@ else
 {
 whistles.push({time:time,reason:$("#whistleReason").val(),video:videos[vid].id});
 var item = $("<li class='list-group-item list-group-item-action'>");
+item.data("w",whistles.length-1);
 var link = $("<a class='text-info' href='#'>");
 link.data("vid",vid);
 link.text("Video " + (vid+1));
@@ -252,16 +292,18 @@ response.text($("#whistleReason").val());
 item.append(response);
 var edit = $("<a href='#' class='fa fa-edit fa-lg text-muted px-1'>");
 edit.data("text",$("#whistleReason").val());
-edit.data("w",whistles.length-1);
 edit.click(function(){$("#whistleReason").val($(this).data("text"));
-$("#whistleReason")[0].placeholder="";$("#whistleAnswer").data("edit",$(this).data("w"));
+$("#whistleReason")[0].placeholder="";$("#whistleAnswer").data("edit",$(this).parent().data("w"));
 $("#reasonSubmit")[0].disabled = false;$("#whistleAnswer").slideDown();});
 item.append(edit);
-//FIXME: del.data("w") is not correct after sibling deleted
 var del = $("<a href='#' class='fa fa-times-circle-o fa-lg text-danger'>");
-del.data("w",whistles.length-1);
-del.click(function() {if(confirm("Are you sure?")){$(this).parent().remove();
-whistles.splice($(this).data("w"),1);}});
+del.click(function() {if(confirm("Are you sure?")){var w = $(this).parent().data("w");
+whistles.splice(w,1);
+$("#whistles").children(":gt("+w+")").each(function(i,x){
+$(x).data("w",$(x).data("w")-1);
+});
+$(this).parent().remove();
+}});
 item.append(del);
 $("#whistles").append(item);
 }
@@ -277,9 +319,9 @@ function formatTime(t) {
 
 function switchVideo()
 {
-$("#vidNum").text(vid+1);
+$("#vidNum").text(vid);
 $("#whistleAnswer").slideUp();
- $("#prevVid")[0].disabled = vid<=0;
+ $("#prevVid")[0].disabled = vid<=1;
  $("#nextVid")[0].disabled = vid>=videos.length-1;
  if(vid >= videos.length-1) {
  	$("#finishWhistles").fadeIn();
@@ -296,6 +338,7 @@ function onYouTubeIframeAPIReady() {
             'onReady': onPlayerReady,
             'onStateChange': onPlayerStateChange
           },
+          videoId: videos[0].videoId,
 
         playerVars:{'autoplay':0,'rel':0,'playsinline':1,'showinfo':0,'modestbranding':1}
         });
