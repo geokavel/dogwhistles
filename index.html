@@ -25,7 +25,7 @@ display: none;
 </style>
 </head>
 <body>
-<div class="container-fluid m-3">
+<div class="container-fluid m-3" ng-app="vidApp" ng-controller="vidCon">
 <div class="row">
 <div class="col-md-6">
 <div>
@@ -66,7 +66,7 @@ display: none;
 <h3>Are you ready?</h3>
 <button class="btn btn-success sec">Begin</button>
 </div>
-<div id="quiz" ng-app="vidApp" ng-controller="vidCon" class="sec">
+<div id="quiz" class="sec">
 <!-- Audio Credit: http://audiosoundclips.com/whistle-sound-effects-sfx/ -->
 <audio id="whistle" src="whistle.m4a" hidden></audio>
 
@@ -118,7 +118,7 @@ Start the Test
 <h3>Now you will answer multiple choice questions about the videos you watched.</h3>
 <button class="btn btn-success sec">Begin</button>
 </div>
-<div class="sec" ng-app="mc" ng-controller="mc-con">
+<div class="sec">
 <div ng-hide="q==questions.length">
 <div ng-repeat="x in questions" ng-show="q==$index">
 <h3>{{x.title}}</h3>
@@ -182,7 +182,7 @@ var defer;
 
 
 var vidApp = angular.module("vidApp",[]);
-vidApp.controller("vidCon", function($scope) {
+vidApp.controller("vidCon", function($scope,$http,$q,$timeout) {
 	$scope.sample = true;
 	$scope.text = 0;
 	$scope.reveal1 = false;
@@ -191,12 +191,8 @@ vidApp.controller("vidCon", function($scope) {
 	$scope.seek = function(t) {player.seekTo(t);player.playVideo();}
 	$scope.startTest = function(){vid = 1; switchVideo();$scope.sample=false;};
 	$scope.answering = false;
-});
 
 
-
-var mcApp = angular.module("mc", []);
-mcApp.controller('mc-con', function($scope,$http,$q,$timeout) {
 defer = $q.defer();
 defer.promise.then(function(data) {
 	$scope.whistles = whistles;
