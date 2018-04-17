@@ -1,4 +1,4 @@
 # dogwhistles
 Political Experiment
 
-Experience it [here](https://rawgit.com/geokavel/dogwhistles/master/index.html).
+Experience it [here](http://geokavel.byethost7.com/dogwhistles/).

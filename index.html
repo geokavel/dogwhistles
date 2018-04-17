@@ -271,7 +271,7 @@ var item = $("<li class='list-group-item list-group-item-action'>");
 item.data("w",whistles.length-1);
 var link = $("<a class='text-info' href='#'>");
 link.data("vid",vid);
-link.text("Video " + (vid+1));
+link.text("Video " + (vid));
 link.click(function(){vid = $(this).data("vid");switchVideo();player.playVideo()});
 item.append(link);
 item.append(" ");
